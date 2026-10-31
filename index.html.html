@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Planning Manifs</title>
+<style>
+:root{--ink:#1e293b;--muted:#64748b;--line:#dbe3ee;--bg:#f3f6fb;--blue:#2457c5;--blue2:#e8efff;--green:#13795b;--red:#b42318;--amber:#9a6700}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--ink)}
+header{background:#17356b;color:#fff;padding:18px clamp(14px,3vw,30px);display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+header h1{margin:0;font-size:1.45rem}header p{margin:3px 0 0;color:#dbe7ff;font-size:.92rem}
+nav{display:flex;gap:8px;flex-wrap:wrap;padding:12px clamp(10px,3vw,28px);background:#fff;border-bottom:1px solid var(--line)}
+button,.button{border:0;border-radius:10px;padding:10px 14px;font:inherit;font-weight:650;cursor:pointer;background:var(--blue2);color:#17356b}
+button.primary{background:var(--blue);color:white}button.danger{background:#fee4e2;color:var(--red)}button.success{background:#d9fbe9;color:#086448}button:disabled{opacity:.5;cursor:not-allowed}
+nav button{background:transparent;color:var(--muted)}nav button.active{background:var(--blue2);color:var(--blue)}
+main{max-width:1200px;margin:0 auto;padding:20px clamp(10px,3vw,26px) 48px}
+h2{margin:0 0 8px;font-size:1.45rem}h3{margin:0 0 10px;font-size:1.08rem}.muted{color:var(--muted)}.small{font-size:.88rem}
+.toolbar{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin:12px 0 16px}.toolbar>.monthnav{margin-left:auto}
+.monthnav{display:flex;align-items:center;gap:10px}.monthnav strong{min-width:180px;text-align:center;text-transform:capitalize}
+.calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.weekday{text-align:center;font-size:.8rem;font-weight:750;color:var(--muted);padding:8px 2px}
+.day{min-height:110px;background:white;border:1px solid var(--line);border-radius:12px;padding:8px;cursor:pointer;text-align:left;color:var(--ink);display:flex;flex-direction:column;gap:5px;min-width:0}
+.day:hover{border-color:var(--blue);box-shadow:0 2px 8px #17356b12}.day.weekend,.day.holiday{background:#eaf2ff}.day.has-events{background:#e5f5e9;border-color:#b7dfc2}.day.has-cancelled-only{background:#fff0ef;border-color:#f2c7c4}.day.has-events.has-cancelled-only{background:#e5f5e9;border-color:#b7dfc2}.day.other{opacity:.42}.day.today{outline:2px solid #7aa2ff}.daynum{font-weight:800}.eventchip{font-size:.74rem;line-height:1.25;background:#e8efff;color:#244b9b;padding:4px 5px;border-radius:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.eventchip.cancelled{background:#fee4e2;color:#9f2721;text-decoration:line-through}.more{font-size:.72rem;color:var(--muted)}
+.panel{background:white;border:1px solid var(--line);border-radius:16px;padding:18px;margin:14px 0;box-shadow:0 3px 12px #1e293b06}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px;margin:16px 0}
+.stat{background:white;border:1px solid var(--line);border-radius:14px;padding:16px}.stat span{display:block;color:var(--muted);font-size:.88rem}.stat strong{font-size:1.8rem}
+form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}label{display:flex;flex-direction:column;gap:6px;font-weight:650;font-size:.92rem}input,select,textarea{width:100%;font:inherit;border:1px solid #cbd5e1;border-radius:9px;padding:10px;background:#fff;color:var(--ink)}textarea{min-height:90px;resize:vertical}.wide{grid-column:1/-1}.fieldrow{display:flex;gap:8px;align-items:center}.fieldrow>*{min-width:0}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.materialrow{display:grid;grid-template-columns:minmax(0,1fr) auto 100px auto auto;gap:8px;margin:8px 0}.materialrow input{min-width:0}
+.event{border:1px solid var(--line);border-radius:12px;padding:14px;margin:10px 0;background:white}.event.cancelled{background:#fffafa;border-color:#f2c7c4}.eventtop{display:flex;gap:12px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap}.eventtitle{font-weight:800;font-size:1.05rem}.tag{display:inline-block;font-size:.78rem;font-weight:750;padding:4px 8px;border-radius:20px;background:#e8efff;color:#244b9b;margin:4px 4px 4px 0}.tag.cancelled{background:#fee4e2;color:#9f2721}.event p{margin:6px 0;white-space:pre-wrap}.empty{padding:24px;text-align:center;color:var(--muted);background:#fff;border:1px dashed var(--line);border-radius:12px}
+.hidden{display:none!important}.notice{padding:10px 12px;background:#fff7d6;border-radius:9px;color:#754f00;margin:10px 0}.voice-btn{padding:7px 10px;font-size:.86rem;white-space:nowrap}.voice-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.voice-row input,.voice-row select,.voice-row textarea{flex:1;min-width:120px}.voice-status{font-size:.85rem;color:var(--muted)}.stats-filter{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:12px 0}.stats-filter select{width:auto;min-width:130px}
+table{border-collapse:collapse;width:100%;background:white}th,td{text-align:left;border-bottom:1px solid var(--line);padding:10px 8px}th{color:var(--muted);font-size:.86rem}
+@media(max-width:650px){main{padding-top:14px}.day{min-height:78px;padding:5px;border-radius:8px}.weekday{font-size:.7rem}.eventchip{font-size:.65rem;padding:3px}.daynum{font-size:.88rem}.calendar{gap:3px}form{grid-template-columns:1fr}.wide{grid-column:auto}.monthnav strong{min-width:130px}.materialrow{grid-template-columns:minmax(0,1fr) auto 72px auto auto}.materialrow button{padding:8px}}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>📅 Planning Manifs</h1><p>Agenda des manifestations de la commune</p></div>
+  <button class="primary" id="quickAdd">＋ Nouvelle manifestation</button>
+</header>
+<nav>
+  <button class="active" data-view="agenda">Agenda</button>
+  <button data-view="stats">Statistiques & matériel</button>
+  <button data-view="cancelled">Manifestations annulées</button>
+  <button data-view="backup">Sauvegarde</button>
+</nav>
+<main>
+<section id="agendaView">
+  <div class="toolbar">
+    <div><h2>Agenda</h2><div class="muted small">Clique sur une date pour consulter ou ajouter les manifestations de la journée.</div></div>
+    <div class="monthnav"><button id="prevMonth" aria-label="Mois précédent">‹</button><strong id="monthLabel"></strong><button id="nextMonth" aria-label="Mois suivant">›</button><button id="todayBtn">Aujourd’hui</button></div>
+  </div>
+  <div class="calendar" id="calendar"></div>
+  <div class="panel"><strong>À retenir</strong><p class="muted small">Plusieurs manifestations peuvent être enregistrées à la même date et à la même heure. Chaque manifestation conserve sa propre fiche.</p></div>
+</section>
+<section id="dayView" class="hidden">
+  <div class="toolbar"><div><button id="backAgenda">← Retour à l’agenda</button></div><button class="primary" id="addForDay">＋ Ajouter à cette date</button></div>
+  <h2 id="dayHeading"></h2><div id="dayEvents"></div>
+</section>
+<section id="formView" class="hidden">
+  <div class="toolbar"><button id="backFromForm">← Retour</button><h2 id="formHeading">Nouvelle manifestation</h2></div>
+  <div class="panel">
+    <div class="notice"><strong>Dictée vocale :</strong> utilise le bouton 🎙 à côté d’un champ pour le remplir à la voix. Tu peux aussi dicter les notes. Autorise le microphone lorsque le navigateur le demande.</div>
+    <div class="actions"><button type="button" class="primary" id="fullVoiceBtn">🎙 Dicter les informations de la manifestation</button><span id="fullVoiceStatus" class="voice-status" aria-live="polite"></span></div>
+    <form id="eventForm">
+      <label>Date de la manifestation *
+        <input type="date" id="eventDate" required>
+      </label>
+      <label>Service organisateur *
+        <select id="service" required>
+          <option value="">Choisir un service…</option><option>Mairie</option><option>Service culturel</option><option>Associations</option>
+        </select>
+      </label>
+      <label class="wide">Nom de la manifestation *
+        <input id="eventName" required placeholder="Ex. Fête de la musique">
+      </label>
+      <label>Heure de début *
+        <input type="time" id="eventTime" required>
+      </label>
+      <label>Heure de fin (facultatif)
+        <input type="time" id="eventEnd">
+      </label>
+      <label class="wide">Lieu
+        <input id="eventLocation" placeholder="Salle, place, adresse…">
+      </label>
+      <label class="wide">Notes / consignes
+        <textarea id="eventNotes" placeholder="Informations utiles, contacts, installation…"></textarea>
+        <span class="fieldrow"><button type="button" id="dictateBtn">🎙 Dicter les notes</button><span id="dictateStatus" class="muted small"></span></span>
+      </label>
+    </form>
+    <div class="panel">
+      <h3>Matériels nécessaires</h3>
+      <div class="muted small">Ajoute autant de lignes que nécessaire. Saisis le nom du matériel dans le premier champ et sa quantité dans le champ numérique. Les anciennes saisies comme « 250 chaises » sont automatiquement corrigées.</div>
+      <datalist id="materialSuggestions"></datalist><div id="materials"></div>
+      <button type="button" id="addMaterial">＋ Ajouter du matériel</button>
+    </div>
+    <div class="actions"><button type="button" class="primary" id="saveEvent">Enregistrer la manifestation</button><button type="button" id="cancelForm">Annuler</button></div>
+    <div id="formError" class="notice hidden"></div>
+  </div>
+</section>
+<section id="statsView" class="hidden">
+  <h2>Statistiques & matériels</h2><p class="muted">Les quantités sont additionnées par type de matériel. Les manifestations actives et annulées sont calculées séparément.</p>
+  <div class="stats-filter"><label for="statsYear">Année affichée</label><select id="statsYear"></select></div><div id="statsContent"></div>
+</section>
+<section id="cancelledView" class="hidden">
+  <h2>Manifestations annulées</h2><p class="muted">Une annulation conserve la fiche et les matériels demandés. Tu peux réactiver une manifestation à tout moment.</p><div id="cancelledEvents"></div>
+</section>
+<section id="backupView" class="hidden">
+  <h2>Sauvegarde</h2>
+  <div class="panel"><h3>Exporter une sauvegarde</h3><p class="muted">Télécharge un fichier de sauvegarde à conserver ou à transférer sur un autre appareil.</p><button class="primary" id="exportBtn">Télécharger la sauvegarde (.json)</button></div>
+  <div class="panel"><h3>Importer une sauvegarde</h3><p class="muted">L’import remplace les données présentes sur cet appareil.</p><input type="file" id="importFile" accept=".json,application/json"><div class="actions"><button id="importBtn">Importer le fichier</button></div></div>
+  <div class="notice">Pour le moment, les données sont enregistrées dans le navigateur de cet appareil. L’export/import permet de les sauvegarder, mais ne synchronise pas automatiquement le PC et l’iPhone.</div>
+</section>
+</main>
+<script>
+(() => {
+const KEY='planningManif_v2';
+let events=[];
+try { events=JSON.parse(localStorage.getItem(KEY)||'[]'); } catch(e){events=[]}
+if(!Array.isArray(events)) events=[];
+const old=localStorage.getItem('planningManif_v1');
+if(!events.length && old){try{events=JSON.parse(old)||[];saveData()}catch(e){}}
+const $=id=>document.getElementById(id);
+const todayISO=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
+let view='agenda',shownDate=todayISO(),monthCursor=new Date(new Date().getFullYear(),new Date().getMonth(),1),editingId=null,returnView='agenda';
+function saveData(){localStorage.setItem(KEY,JSON.stringify(events))}
+migrateEmbeddedMaterialQuantities();
+function uid(){return 'e'+Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function dateObj(s){const [y,m,d]=(s||todayISO()).split('-').map(Number);return new Date(y,m-1,d)}
+function fmtDate(s){return dateObj(s).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function sortEvents(list){return [...list].sort((a,b)=>(a.date||'').localeCompare(b.date||'')||(a.time||'').localeCompare(b.time||'')||(a.name||'').localeCompare(b.name||''))}
+function active(){return events.filter(e=>!e.cancelled)}
+function materialKey(value){
+  return String(value??'').trim().replace(/\s+/g,' ').normalize('NFD')
+    .replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('fr-FR');
+}
+function readMaterialQuantity(material){
+  // Compatibilité avec les champs des anciennes sauvegardes.
+  const raw=material.qty ?? material.quantity ?? material.quantite ?? material.qte ?? material.quantité ?? 0;
+  const parsed=typeof raw==='number'?raw:Number(String(raw).trim().replace(/\s/g,'').replace(',','.'));
+  return Number.isFinite(parsed)&&parsed>0?parsed:0;
+}
+function extractEmbeddedQuantity(material){
+  const name=String(material?.name??material?.nom??'').trim().replace(/\s+/g,' ');
+  const qty=readMaterialQuantity(material);
+  if(!name)return {name:'',qty};
+  const leading=name.match(/^(\d+(?:[,.]\d+)?)\s+(.+)$/);
+  const trailing=name.match(/^(.+?)\s+(\d+(?:[,.]\d+)?)$/);
+  if(qty<=1 && leading){
+    const parsed=Number(leading[1].replace(',','.'));
+    if(Number.isFinite(parsed))return {name:leading[2].trim(),qty:parsed};
+  }
+  if(qty<=1 && trailing){
+    const parsed=Number(trailing[2].replace(',','.'));
+    if(Number.isFinite(parsed))return {name:trailing[1].trim(),qty:parsed};
+  }
+  return {name,qty};
+}
+function migrateEmbeddedMaterialQuantities(){
+  let changed=false;
+  events.forEach(event=>{
+    const list=Array.isArray(event.materials)?event.materials:
+      (Array.isArray(event.materiels)?event.materiels:[]);
+    if(!Array.isArray(event.materials)&&list.length){event.materials=list;changed=true}
+    list.forEach(material=>{
+      const fixed=extractEmbeddedQuantity(material);
+      const oldName=String(material.name??material.nom??'').trim();
+      const oldQty=readMaterialQuantity(material);
+      if(fixed.name!==oldName || fixed.qty!==oldQty || material.qty!==fixed.qty){
+        material.name=fixed.name;
+        material.qty=fixed.qty;
+        changed=true;
+      }
+    });
+  });
+  if(changed)saveData();
+}
+function materialsFor(list){
+  const totals=new Map();
+  list.forEach(event=>{
+    const materials=Array.isArray(event.materials)?event.materials:
+      (Array.isArray(event.materiels)?event.materiels:[]);
+    materials.forEach(material=>{
+      const name=String(material.name??material.nom??'').trim().replace(/\s+/g,' ');
+      if(!name)return;
+      const key=materialKey(name);
+      if(!totals.has(key))totals.set(key,{name,quantity:0});
+      totals.get(key).quantity+=readMaterialQuantity(material);
+    });
+  });
+  return [...totals.values()].sort((a,b)=>a.name.localeCompare(b.name,'fr'));
+}
+function easterSunday(year){
+  const a=year%19,b=Math.floor(year/100),c=year%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3);
+  const h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451);
+  const month=Math.floor((h+l-7*m+114)/31),day=((h+l-7*m+114)%31)+1;
+  return new Date(year,month-1,day);
+}
+function isFrenchHoliday(date){
+  const y=date.getFullYear(), fixed=[`${y}-01-01`,`${y}-05-01`,`${y}-05-08`,`${y}-07-14`,`${y}-08-15`,`${y}-11-01`,`${y}-11-11`,`${y}-12-25`];
+  const easter=easterSunday(y), fmt=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const movable=[1,39,50].map(offset=>{const d=new Date(easter);d.setDate(d.getDate()+offset);return fmt(d)});
+  return fixed.includes(fmt(date))||movable.includes(fmt(date));
+}
+function showView(next){view=next;['agenda','day','form','stats','cancelled','backup'].forEach(v=>$(v+'View').classList.toggle('hidden',v!==next));document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===next));if(next==='agenda')renderCalendar();if(next==='day')renderDay();if(next==='stats')renderStats();if(next==='cancelled')renderCancelled()}
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
+$('prevMonth').onclick=()=>{monthCursor=new Date(monthCursor.getFullYear(),monthCursor.getMonth()-1,1);renderCalendar()};
+$('nextMonth').onclick=()=>{monthCursor=new Date(monthCursor.getFullYear(),monthCursor.getMonth()+1,1);renderCalendar()};
+$('todayBtn').onclick=()=>{monthCursor=new Date();monthCursor=new Date(monthCursor.getFullYear(),monthCursor.getMonth(),1);shownDate=todayISO();showDay(shownDate)};
+$('quickAdd').onclick=()=>openForm(todayISO(),'agenda');
+$('backAgenda').onclick=()=>showView('agenda');
+$('backFromForm').onclick=()=>showView(returnView);
+$('cancelForm').onclick=()=>showView(returnView);
+$('addForDay').onclick=()=>openForm(shownDate,'day');
+function renderCalendar(){
+ const cal=$('calendar');cal.innerHTML='';
+ ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'].forEach(x=>{const el=document.createElement('div');el.className='weekday';el.textContent=x;cal.append(el)});
+ const first=new Date(monthCursor.getFullYear(),monthCursor.getMonth(),1);
+ $('monthLabel').textContent=first.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
+ const offset=(first.getDay()+6)%7;const start=new Date(first);start.setDate(first.getDate()-offset);
+ for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);const iso=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const dayEvents=sortEvents(events.filter(e=>e.date===iso));const hasActive=dayEvents.some(e=>!e.cancelled),hasCancelled=dayEvents.some(e=>e.cancelled);const weekend=d.getDay()===0||d.getDay()===6;const holiday=isFrenchHoliday(d);const cell=document.createElement('button');cell.className='day'+(d.getMonth()!==first.getMonth()?' other':'')+(iso===todayISO()?' today':'')+((weekend||holiday)?' weekend':'')+(holiday?' holiday':'')+(hasActive?' has-events':'')+(!hasActive&&hasCancelled?' has-cancelled-only':'');cell.innerHTML=`<span class="daynum">${d.getDate()}</span>`;
+  dayEvents.slice(0,3).forEach(e=>{const chip=document.createElement('span');chip.className='eventchip'+(e.cancelled?' cancelled':'');chip.textContent=(e.time?e.time+' ':'')+e.name;cell.append(chip)});
+  if(dayEvents.length>3){const more=document.createElement('span');more.className='more';more.textContent=`+ ${dayEvents.length-3} autre(s)`;cell.append(more)}
+  cell.onclick=()=>showDay(iso);cal.append(cell);
+ }
+}
+function showDay(iso){shownDate=iso;monthCursor=new Date(dateObj(iso).getFullYear(),dateObj(iso).getMonth(),1);showView('day')}
+function eventCard(e){
+ const mats=(e.materials||[]).filter(m=>m.name).map(m=>`${esc(m.name??m.nom)} : ${readMaterialQuantity(m)}`).join(' · ');
+ return `<article class="event ${e.cancelled?'cancelled':''}"><div class="eventtop"><div><div class="eventtitle">${esc(e.time||'Heure à définir')}${e.endTime?'–'+esc(e.endTime):''} · ${esc(e.name||'Sans titre')}</div><span class="tag">${esc(e.service||'Service non précisé')}</span>${e.cancelled?'<span class="tag cancelled">ANNULÉE</span>':''}</div><div class="actions" style="margin:0"><button type="button" data-edit="${esc(e.id)}">Modifier</button>${e.cancelled?`<button type="button" class="success" data-reactivate="${esc(e.id)}">Réactiver</button>`:`<button type="button" class="danger" data-cancel="${esc(e.id)}">Annuler</button>`}<button type="button" class="danger" data-delete="${esc(e.id)}">Supprimer</button></div></div>${e.location?`<p>📍 ${esc(e.location)}</p>`:''}${e.notes?`<p>${esc(e.notes)}</p>`:''}${mats?`<p class="small"><strong>Matériels :</strong> ${mats}</p>`:''}</article>`
+}
+function bindEventActions(root){
+  if(root.dataset.actionsBound==='1')return;
+  root.dataset.actionsBound='1';
+  root.addEventListener('click',event=>{
+    const button=event.target.closest('button[data-edit],button[data-cancel],button[data-reactivate],button[data-delete]');
+    if(!button||!root.contains(button))return;
+    const id=button.dataset.edit||button.dataset.cancel||button.dataset.reactivate||button.dataset.delete;
+    const item=events.find(entry=>String(entry.id)===String(id));
+    if(!item)return;
+    if(button.dataset.edit){openForm(null,view,id);return}
+    if(button.dataset.cancel){
+      item.cancelled=true;saveData();refreshCurrent();
+      return;
+    }
+    if(button.dataset.reactivate){
+      item.cancelled=false;saveData();refreshCurrent();
+      return;
+    }
+    if(button.dataset.delete&&window.confirm('Supprimer définitivement cette fiche ?')){
+      events=events.filter(entry=>String(entry.id)!==String(id));saveData();refreshCurrent();
+    }
+  });
+}
+function refreshCurrent(){if(view==='day')renderDay();else if(view==='cancelled')renderCancelled();else if(view==='stats')renderStats();else renderCalendar()}
+function renderDay(){
+ $('dayHeading').textContent=fmtDate(shownDate);const list=sortEvents(events.filter(e=>e.date===shownDate));const root=$('dayEvents');
+ root.innerHTML=list.length?`<p class="muted small">${list.length} manifestation(s) ce jour-là. Plusieurs événements à la même heure sont autorisés.</p>`+list.map(eventCard).join(''):'<div class="empty">Aucune manifestation n’est enregistrée à cette date.<br>Tu peux en ajouter une avec le bouton ci-dessus.</div>';
+ bindEventActions(root)
+}
+function openForm(date,back,id){
+ editingId=id||null;returnView=back||'agenda';$('formHeading').textContent=editingId?'Modifier la manifestation':'Nouvelle manifestation';$('formError').classList.add('hidden');
+ const e=editingId?events.find(x=>x.id===editingId):null;
+ $('eventDate').value=e?.date||date||shownDate||todayISO();$('service').value=e?.service||'';$('eventName').value=e?.name||'';$('eventTime').value=e?.time||'18:00';$('eventEnd').value=e?.endTime||'';$('eventLocation').value=e?.location||'';$('eventNotes').value=e?.notes||'';
+ refreshMaterialSuggestions();$('materials').innerHTML='';(e?.materials?.length?e.materials:[{name:'',qty:1}]).forEach(m=>addMaterialRow(m.name,m.qty));
+ $('saveEvent').textContent=editingId?'Enregistrer les modifications':'Enregistrer la manifestation';showView('form');installFieldMicrophones()
+}
+const DEFAULT_MATERIALS=[
+ 'Tables en pins','Tables plastiques','Chaises','Bancs','Claustrats','Samia','Grilles',
+ 'Barrières de sécurité','Tente triple fixe','Tente double fixe','Tente simple fixe',
+ 'Tentes doubles parapluie','Tentes simples parapluie','Lestage et côtés',
+ 'Coffret 63 A','Coffret 32 A','Enrouleur','Rallonges','Multi',
+ 'Sono portable','Sono complète','Micro filaire','Micro HF','Frigo'
+];
+function refreshMaterialSuggestions(){
+ const datalist=$('materialSuggestions');
+ if(!datalist)return;
+ const byKey=new Map();
+ [...DEFAULT_MATERIALS,...events.flatMap(event=>(Array.isArray(event.materials)?event.materials:[])
+   .map(material=>String(material.name??'').trim()).filter(Boolean))]
+   .forEach(name=>{const key=materialKey(name);if(key&&!byKey.has(key))byKey.set(key,name)});
+ datalist.innerHTML=[...byKey.values()].sort((a,b)=>a.localeCompare(b,'fr'))
+   .map(name=>`<option value="${esc(name)}"></option>`).join('');
+}
+function addMaterialRow(name='',qty=1){
+ const row=document.createElement('div');row.className='materialrow';row.innerHTML=`<input list="materialSuggestions" aria-label="Nom du matériel" placeholder="Saisir ou rechercher un matériel…" value="${esc(name)}"><input aria-label="Quantité" type="number" min="0" step="1" value="${Number(qty)||0}"><button type="button" class="danger" aria-label="Retirer la ligne">×</button>`;
+ row.querySelector('button').onclick=()=>row.remove();
+ const micName=document.createElement('button');micName.type='button';micName.className='voice-btn';micName.textContent='🎙';micName.title='Dicter le matériel';micName.onclick=()=>startVoiceForElement(row.children[0],'text');
+ const micQty=document.createElement('button');micQty.type='button';micQty.className='voice-btn';micQty.textContent='🎙';micQty.title='Dicter la quantité';micQty.onclick=()=>startVoiceForElement(row.children[1],'number');
+ row.insertBefore(micName,row.children[1]);row.insertBefore(micQty,row.children[3]||null);$('materials').append(row)
+}
+$('addMaterial').onclick=()=>addMaterialRow();
+$('saveEvent').onclick=()=>{
+ const date=$('eventDate').value,service=$('service').value,name=$('eventName').value.trim(),time=$('eventTime').value;
+ if(!date||!service||!name||!time){$('formError').textContent='Merci de renseigner la date, le service, le nom de la manifestation et l’heure de début.';$('formError').classList.remove('hidden');return}
+ const materials=[...$('materials').querySelectorAll('.materialrow')].map(row=>{
+   const inputs=row.querySelectorAll('input');
+   return extractEmbeddedQuantity({name:inputs[0].value.trim(),qty:Math.max(0,Number(inputs[1].value)||0)});
+  }).filter(material=>material.name);
+ const record={id:editingId||uid(),date,service,name,time,endTime:$('eventEnd').value,location:$('eventLocation').value.trim(),notes:$('eventNotes').value.trim(),materials,cancelled:editingId?(events.find(x=>x.id===editingId)?.cancelled||false):false};
+ if(editingId){events=events.map(x=>x.id===editingId?record:x)}else{events.push(record)}
+ saveData();shownDate=date;monthCursor=new Date(dateObj(date).getFullYear(),dateObj(date).getMonth(),1);showView(returnView==='day'?'day':'agenda')
+};
+$('dictateBtn').onclick=()=>{
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SR){$('dictateStatus').textContent='La dictée vocale n’est pas disponible dans ce navigateur. Tu peux utiliser la dictée du clavier/téléphone.';return}
+ const rec=new SR();rec.lang='fr-FR';rec.interimResults=false;rec.onstart=()=>$('dictateStatus').textContent='J’écoute…';rec.onerror=()=>$('dictateStatus').textContent='Dictée interrompue ou non autorisée.';rec.onend=()=>$('dictateStatus').textContent='';rec.onresult=e=>{$('eventNotes').value+=($('eventNotes').value?' ':'')+e.results[0][0].transcript};rec.start()
+};
+
+function speechRecognitionClass(){return window.SpeechRecognition||window.webkitSpeechRecognition||null}
+function startVoiceFor(targetId,mode='text',onTranscript){
+  const SR=speechRecognitionClass();
+  const status=$('fullVoiceStatus');
+  if(!SR){if(status)status.textContent='La reconnaissance vocale n’est pas prise en charge ici. Essaie Chrome ou Edge, ou la dictée du clavier.';return}
+  const target=$(targetId);
+  if(!target)return;
+  const recognition=new SR();
+  recognition.lang='fr-FR';recognition.interimResults=false;recognition.maxAlternatives=1;
+  if(status)status.textContent='J’écoute… Parle maintenant.';
+  recognition.onresult=event=>{
+    const transcript=event.results[0][0].transcript.trim();
+    if(onTranscript){onTranscript(transcript);return}
+    if(mode==='date'){
+      const parsed=parseSpokenDate(transcript);
+      if(parsed)target.value=parsed;else target.value=transcript;
+    }else if(mode==='time'){
+      const parsed=parseSpokenTime(transcript);
+      if(parsed)target.value=parsed;else target.value=transcript;
+    }else if(mode==='number'){
+      const number=spokenNumber(transcript);
+      if(number!==null)target.value=number;else target.value=transcript;
+    }else{
+      target.value=(target.value?target.value+' ':'')+transcript;
+    }
+    target.dispatchEvent(new Event('input',{bubbles:true}));
+    if(status)status.textContent='Texte reconnu : '+transcript;
+  };
+  recognition.onerror=event=>{if(status)status.textContent='Microphone indisponible : '+(event.error||'autorisation refusée')+'.'};
+  recognition.onend=()=>{if(status&&status.textContent==='J’écoute… Parle maintenant.')status.textContent='Dictée terminée.'};
+  try{recognition.start()}catch(error){if(status)status.textContent='Impossible de démarrer le microphone. Vérifie les autorisations du navigateur.'}
+}
+function startVoiceForElement(target,mode){
+  const SR=speechRecognitionClass();
+  if(!SR){$('fullVoiceStatus').textContent='Reconnaissance vocale indisponible. Essaie Chrome ou Edge.';return}
+  const recognition=new SR();recognition.lang='fr-FR';recognition.interimResults=false;
+  $('fullVoiceStatus').textContent='J’écoute…';
+  recognition.onresult=event=>{
+    const transcript=event.results[0][0].transcript.trim();
+    if(mode==='number'){const value=spokenNumber(transcript);if(value!==null)target.value=value;}
+    else target.value=(target.value?target.value+' ':'')+transcript;
+    $('fullVoiceStatus').textContent='Reconnu : '+transcript;
+  };
+  recognition.onerror=event=>$('fullVoiceStatus').textContent='Microphone indisponible : '+event.error;
+  try{recognition.start()}catch(error){$('fullVoiceStatus').textContent='Impossible de démarrer le microphone.'}
+}
+function spokenNumber(value){
+  const normalized=value.toLocaleLowerCase('fr-FR').replace(',', '.').trim();
+  const numeric=normalized.match(/\d+(?:\.\d+)?/);
+  if(numeric)return Number(numeric[0]);
+  const words={zero:0,'zéro':0,un:1,une:1,deux:2,trois:3,quatre:4,cinq:5,six:6,sept:7,huit:8,neuf:9,dix:10,vingt:20,trente:30,quarante:40,cinquante:50,soixante:60,cent:100,deuxcent:200,troiscent:300};
+  const cleaned=normalized.replace(/-/g,' ').split(/\s+/);
+  let total=0,found=false;
+  cleaned.forEach(word=>{if(Object.prototype.hasOwnProperty.call(words,word)){total+=words[word];found=true}});
+  return found?total:null;
+}
+function parseSpokenDate(value){
+  const text=value.toLocaleLowerCase('fr-FR');
+  const iso=text.match(/\b(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})\b/);
+  if(iso)return `${iso[3]}-${iso[2].padStart(2,'0')}-${iso[1].padStart(2,'0')}`;
+  const months={'janvier':'01','février':'02','fevrier':'02','mars':'03','avril':'04','mai':'05','juin':'06','juillet':'07','août':'08','aout':'08','septembre':'09','octobre':'10','novembre':'11','décembre':'12','decembre':'12'};
+  const match=text.match(/\b(\d{1,2})\s+(janvier|février|fevrier|mars|avril|mai|juin|juillet|août|aout|septembre|octobre|novembre|décembre|decembre)(?:\s+(\d{4}))?/);
+  if(!match)return null;
+  const year=match[3]||String(new Date().getFullYear());
+  return `${year}-${months[match[2]]}-${match[1].padStart(2,'0')}`;
+}
+function parseSpokenTime(value){
+  const text=value.toLocaleLowerCase('fr-FR');
+  const match=text.match(/\b(\d{1,2})(?:\s*h(?:eures?)?\s*(\d{1,2})?)?\b/);
+  if(!match)return null;
+  const hour=Number(match[1]),minute=Number(match[2]||0);
+  if(hour>23||minute>59)return null;
+  return `${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`;
+}
+function installFieldMicrophones(){
+  const fields=[['eventDate','date'],['eventName','text'],['eventTime','time'],['eventEnd','time'],['eventLocation','text'],['eventNotes','text'],['service','text']];
+  fields.forEach(([id,mode])=>{
+    const field=$(id);if(!field||field.dataset.voiceReady)return;
+    const button=document.createElement('button');button.type='button';button.className='voice-btn';button.textContent='🎙';
+    button.title='Remplir ce champ à la voix';button.setAttribute('aria-label','Dicter '+id);
+    button.onclick=()=>startVoiceFor(id,mode,transcript=>{
+      if(id==='service'){
+        const options=[...field.options].filter(o=>o.value);
+        const found=options.find(o=>o.text.toLocaleLowerCase('fr-FR').includes(transcript.toLocaleLowerCase('fr-FR')));
+        if(found)field.value=found.value;else $('fullVoiceStatus').textContent='Service non reconnu. Choisis Mairie, Service culturel ou Associations.';
+      }else{field.value=(mode==='text'&&id==='eventNotes'&&field.value?field.value+' ':'')+transcript;}
+    });
+    field.insertAdjacentElement('afterend',button);field.dataset.voiceReady='1';
+  });
+}
+function parseFullDictation(transcript){
+  const text=transcript.trim();
+  const get=(label,nextLabels)=>{
+    const labels=[label,...nextLabels].join('|');
+    const match=text.match(new RegExp('(?:^|[,;.])\\\\s*(?:'+label+')\\\\s*[:,-]?\\\\s*(.*?)(?=\\\\s*(?:[,;.])?\\\\s*(?:'+nextLabels.join('|')+')\\\\s*[:,-]|$)','i'));
+    return match?match[1].trim():'';
+  };
+  const name=get('nom',['date','service','début','debut','fin','lieu','notes','matériel','materiel']);
+  const date=get('date',['service','début','debut','fin','lieu','notes','matériel','materiel']);
+  const service=get('service',['début','debut','fin','lieu','notes','matériel','materiel']);
+  const begin=get('début|debut',['fin','lieu','notes','matériel','materiel']);
+  const finish=get('fin',['lieu','notes','matériel','materiel']);
+  const location=get('lieu',['notes','matériel','materiel']);
+  const notes=get('notes',['matériel','materiel']);
+  if(name)$('eventName').value=name;
+  if(date){const parsed=parseSpokenDate(date);if(parsed)$('eventDate').value=parsed;}
+  if(service){
+    const s=service.toLocaleLowerCase('fr-FR');
+    $('service').value=s.includes('culture')?'Service culturel':s.includes('association')?'Associations':s.includes('mairie')?'Mairie':'';
+  }
+  if(begin){const parsed=parseSpokenTime(begin);if(parsed)$('eventTime').value=parsed;}
+  if(finish){const parsed=parseSpokenTime(finish);if(parsed)$('eventEnd').value=parsed;}
+  if(location)$('eventLocation').value=location;
+  if(notes)$('eventNotes').value=notes;
+  $('fullVoiceStatus').textContent='Dictée traitée. Vérifie les champs avant d’enregistrer.';
+}
+$('fullVoiceBtn').onclick=()=>startVoiceFor('eventName','text',parseFullDictation);
+
+function renderStats(){
+  const years=[...new Set(events.map(e=>(e.date||'').slice(0,4)).filter(y=>/^\d{4}$/.test(y)))].sort();
+  const currentYear=String(new Date().getFullYear());
+  if(!years.includes(currentYear))years.push(currentYear);
+  const yearSelect=$('statsYear');
+  const previous=yearSelect.value;
+  yearSelect.innerHTML=years.sort().reverse().map(y=>`<option value="${y}">${y}</option>`).join('');
+  yearSelect.value=years.includes(previous)?previous:currentYear;
+  const year=yearSelect.value;
+  const yearEvents=events.filter(e=>(e.date||'').startsWith(year));
+  const a=yearEvents.filter(e=>!e.cancelled),c=yearEvents.filter(e=>e.cancelled);
+  const catCount=s=>a.filter(e=>e.service===s).length;
+  $('statsContent').innerHTML=`<div class="cards"><div class="stat"><span>Manifestations en ${year}</span><strong>${yearEvents.length}</strong></div><div class="stat"><span>Actives</span><strong>${a.length}</strong></div><div class="stat"><span>Annulées</span><strong>${c.length}</strong></div><div class="stat"><span>Mairie</span><strong>${catCount('Mairie')}</strong></div><div class="stat"><span>Service culturel</span><strong>${catCount('Service culturel')}</strong></div><div class="stat"><span>Associations</span><strong>${catCount('Associations')}</strong></div></div>
+  <div class="panel"><h3>Matériels prévus — manifestations actives en ${year}</h3>${materialTable(materialsFor(a))}</div><div class="panel"><h3>Matériels — manifestations annulées en ${year}</h3>${materialTable(materialsFor(c))}</div><div class="panel"><h3>Nombre de manifestations par service en ${year}</h3><table><thead><tr><th>Service</th><th>Actives</th><th>Annulées</th></tr></thead><tbody>${['Mairie','Service culturel','Associations'].map(s=>`<tr><td>${s}</td><td>${a.filter(e=>e.service===s).length}</td><td>${c.filter(e=>e.service===s).length}</td></tr>`).join('')}</tbody></table></div>`;
+}
+$('statsYear').addEventListener('change',renderStats);
+function materialTable(rows){
+  return rows.length?`<table><thead><tr><th>Matériels</th><th>Quantité totale</th></tr></thead><tbody>${rows.map(item=>`<tr><td>${esc(item.name)}</td><td>${Number(item.quantity).toLocaleString('fr-FR')}</td></tr>`).join('')}</tbody></table>`:'<p class="muted">Aucun matériel n’a été renseigné.</p>';
+}
+function renderCancelled(){const list=sortEvents(events.filter(e=>e.cancelled));$('cancelledEvents').innerHTML=list.length?list.map(eventCard).join(''):'<div class="empty">Aucune manifestation n’a été annulée pour le moment.</div>';bindEventActions($('cancelledEvents'))}
+$('exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify({app:'Planning Manifs',version:2,exportedAt:new Date().toISOString(),events},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='planning-manif-sauvegarde.json';a.click();URL.revokeObjectURL(a.href)};
+$('importBtn').onclick=async()=>{const file=$('importFile').files[0];if(!file){alert('Choisis d’abord un fichier de sauvegarde.');return}try{const data=JSON.parse(await file.text());const list=Array.isArray(data)?data:data.events;if(!Array.isArray(list))throw Error();if(!confirm('Remplacer les données de cet appareil par la sauvegarde importée ?'))return;events=list.map(e=>({...e,id:e.id||uid(),materials:Array.isArray(e.materials)?e.materials:[],cancelled:!!e.cancelled}));saveData();alert('Sauvegarde importée.');showView('agenda')}catch(e){alert('Impossible de lire ce fichier. Vérifie qu’il s’agit d’une sauvegarde Planning Manif.')}};
+renderCalendar();
+})();
+</script>
+</body>
+</html>
